@@ -13,10 +13,18 @@
 <body>
 	<nav class="uk-container uk-navbar-container uk-margin" uk-navbar>
 	    <div class="uk-navbar-left">
-	        <a class="uk-navbar-item uk-logo" href="#">{dev-o-talk}</a>
+	        <a class="uk-navbar-item uk-logo" href="dashboard.php">{dev-o-talk}</a>
 		</div>
 	    <div class="uk-navbar-item uk-navbar-right">
+	    	<form method="POST" action="profile.php">
+	    		<input class="uk-text-small" type="text" name="targetUser" />
+	    		<input class="uk-button-small uk-button-primary" type="submit" name="btnUserSearch" value="Search" />
+	    		<input class="uk-button-small uk-button-secondary" type="submit" name="btnSelfSearch" value="See my own" />
+	    	</form>
 	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
+	        <form method="POST" action="index.php">
+	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
+	        </form>
 	    </div>
 	</nav>
 
@@ -37,12 +45,141 @@
 							<h2 class="uk-heading-large" style="color: #FFFFFF"><?php getUserName() ?></h2>
 							<h5>iOS developer</h5>
 						</div>
-						<div class="uk-width-1-2"></div>
+						<div class="uk-width-1-2">
+							<?php 
+							  	if(isset($_SESSION['target_user_id'])) {
+								  	echo 
+								  	'<form method="POST" action="profile.php">';
+										 
+									$result = getNotifConnectionDetails();
+	    							if(mysqli_num_rows($result) > 0) {
+	    								$row =mysqli_fetch_assoc($result);
+	    								if($row['notif_status'] == 'pending') {
+	    									echo 
+	    									'<button class="uk-button-primary uk-button-large"> Connection Requested </button>';
+	    								} elseif($row['notif_status'] == 'approved') {
+	    									echo 
+	    									'<button class="uk-button-primary uk-button-large"> Connected </button>';
+	    									echo 
+	    									'<input type="submit" class="uk-button-danger uk-button-small" name="btnDisconnectUser" value="Disconnect" />';
+	    								}
+	    							} else {
+	    								echo 
+	    								'<input type="submit" class="uk-button-primary uk-button-large" name="btnConnectUser" value="Connect Now" />';
+	    							}
+									echo 
+									'</form>';
+							  	}
+							?>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</section>
+
+	<?php
+		if(!(isset($_SESSION['target_user_id']))) {
+			echo 
+			'<div id="profileModal" class="uk-modal uk-flex-top" uk-modal>
+			    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical" uk-overflow-auto>
+			    	<p class="uk-modal-title">Your Profile Details</p>
+			        <button class="uk-modal-close-default" type="button" uk-close></button>
+
+			        <!-- Modal content-->
+			        <form method="POST" action="profile.php">
+					    <fieldset class="uk-fieldset">
+					        <div class="uk-margin">
+					            <input class="uk-input" type="text" name="firstName" placeholder="first name">
+					        </div>
+					        <div class="uk-margin">
+					            <input class="uk-input" type="text" name="lastName" placeholder="last name">
+					        </div>
+					        <div class="uk-margin">
+					            <input class="uk-input" type="text" name="nickName" placeholder="nickname">
+					        </div>
+					        <div class="uk-margin">
+					            <input class="uk-input" type="text" name="mobile" placeholder="mobile">
+					        </div>
+					        <div class="uk-margin">
+					            <textarea class="uk-textarea" rows="5" name="location" placeholder="location"></textarea>
+					        </div>
+					        <div class="uk-margin">
+					            <textarea class="uk-textarea" rows="5" name="qualification" placeholder="qualification"></textarea>
+					        </div>
+					        <div class="uk-margin">
+					            <textarea class="uk-textarea" rows="5" name="achievement" placeholder="achievement"></textarea>
+					        </div>
+					        <div class="uk-margin">
+					            <input type="submit" class="uk-button-primary uk-button-large" name="btnProfileForm" value="Submit">
+					        </div>
+					    </fieldset>
+					</form>
+			    </div>
+			</div>
+
+			<div class="uk-text-right"> <button class="uk-button-primary uk-button-small" uk-toggle="target: #profileModal">Edit Profile</button> </div>';
+		}
+	?>
+	
+	<?php 
+		$result_profile = getUserProfile();
+        if(mysqli_num_rows($result_profile) > 0) {
+          	while($row =mysqli_fetch_assoc($result_profile)) { 
+				echo
+				'<section class="uk-section uk-position-relative">
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Username </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['user_id'] . ' </h3> </div>
+						</div>
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Firstname </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['first_name'] . ' </h3> </div>
+						</div>
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Lastname </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['last_name'] . ' </h3> </div>
+						</div>
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Nickname </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['nick_name'] . ' </h3> </div>
+						</div>
+					</div>
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Email </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['email'] . ' </h3> </div>
+						</div>
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Mobile </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['mobile'] . ' </h3> </div>
+						</div>
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Location </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['location'] . ' </h3> </div>
+						</div>
+					</div>
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Qualification </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['qualification'] . ' </h3> </div>
+						</div>
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Achievement </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['achievement'] . ' </h3> </div>
+						</div>
+					</div>
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+						<div class="uk-grid" uk-grid>
+							<div class="uk-width-1-4"> <h3> Last Login </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $row['last_login'] . ' </h3> </div>
+						</div>
+					</div>
+				</section>';
+			}
+		}
+	?>
 
 	<footer style="position: relative; padding: 60px 0 0 0; background-color: #202020;">
 		<div class="bottom-line">

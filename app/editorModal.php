@@ -18,7 +18,6 @@
   			<p>Multi-language Editor for you..</p>
   			<iframe src="editor.php" width="100%" height="400px"  frameborder="0"></iframe>
         	<div class="uk-text-right">
-        		<?php displayMessage($_SESSION['editorFromPage']); ?>
         		<?php 
         			echo '<a href="'.$_SESSION['editorFromPage'].'.php"><button class="uk-button uk-button-primary" type="button"> <- Go </button></a>';
         		?>

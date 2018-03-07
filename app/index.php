@@ -29,7 +29,7 @@
 				<div class="uk-grid" data-uk-grid-margin>
 					<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
 						<h4 class="uk-heading-large" style="color: #FFFFFF"">Discover and connect to developers around you.</h4>
-						<a class="uk-button uk-button-primary uk-button-large" style="background-color: #3fa962" href="#">Connect Now</a>
+						<a class="uk-button uk-button-primary uk-button-large" style="background-color: #3fa962" href="#signInForm">Connect Now</a>
 					</div>
 				</div>
 			</div>

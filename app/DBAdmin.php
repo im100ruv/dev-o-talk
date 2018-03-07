@@ -26,6 +26,7 @@ $conn = mysqli_connect(DB_URL, DB_USER, DB_PASSWORD, DATABASE);
 // $_SESSION['stamp_temp_textarea']
 // $_SESSION['comment_temp_textarea']
 // $_SESSION['curr_stamp_sn']
+// $_SESSION['target_user_id']
 // ===============================================================
 
 
@@ -182,6 +183,80 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 }
 
+// Set Target user (searched user)
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnUserSearch']) ) {
+		$_SESSION['target_user_id'] = $_POST['targetUser'];
+	} elseif (isset($_POST['btnSelfSearch'])) {
+		if( isset($_SESSION['target_user_id']) ) {
+			unset($_SESSION['target_user_id']);
+		}
+	}
+}
+
+// Set notification table for user connections
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnConnectUser']) ) {
+		$notifToId = $_SESSION['target_user_id'];
+		$notifById = $_SESSION['userId'];
+
+		$query_insert_notif = "INSERT INTO notification (notif_by, notif_to, notif_date, notif_status) 
+								VALUES ('$notifById', '$notifToId', NOW(), 'pending')";
+		$query_status = mysqli_query($conn, $query_insert_notif);
+	}
+}
+
+// Make relation between users
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnConfirmConnect']) ) {
+		$notifById = $_POST['hiddenValue'];
+		$notifToId = $_SESSION['userId'];
+
+		$query_update_notif = "UPDATE notification SET notif_status = 'accepted' WHERE notif_to = '$notifToId' AND notif_by = '$notifById'";
+		$query_status = mysqli_query($conn, $query_update_notif);
+
+		if($query_status) {
+			$query_insert_relation = "INSERT INTO relation (partner_1, partner_2, relation_type, date_related, relation_status) 
+										VALUES ('$notifById', '$notifToId', 'friend', NOW(), 'connected')";
+			$query_status = mysqli_query($conn, $query_insert_relation);
+
+			$msg = "Congratulation! You are now connected to " . $notifById . ".";
+			displayMessage($msg);
+		}
+	}
+}
+
+// Delete relation between users
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnDisconnectUser']) ) {
+		$notifToId = $_SESSION['target_user_id'];
+		$notifById = $_SESSION['userId'];
+
+		$query_delete_relation = "UPDATE relation SET relation_status = 'disconnected' WHERE (partner_1 = '$notifToId' AND partner_2 = '$notifById') OR (partner_2 = '$notifToId' AND partner_1 = '$notifById') AND relation_status = 'connected'";
+		$query_status = mysqli_query($conn, $query_delete_relation);
+
+		$query_delete_notif = "UPDATE notification SET notif_status = 'deleted' WHERE (notif_to = '$notifToId' AND notif_by = '$notifById') OR (notif_by = '$notifToId' AND notif_to = '$notifById') AND notif_status = 'accepted'";
+		$query_status = mysqli_query($conn, $query_delete_notif);
+	}
+}
+
+// Set user profile
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnProfileForm']) ) {
+		$user = $_SESSION['userId'];
+		$fname = $_POST['firstName'];
+		$lname = $_POST['lastName'];
+		$nname = $_POST['nickName'];
+		$mob = $_POST['mobile'];
+		$loc = $_POST['location'];
+		$quali = $_POST['qualification'];
+		$achiv = $_POST['achievement'];
+
+		$query_update_user = "UPDATE user SET first_name = '$fname', last_name = '$lname', nick_name = '$nname', mobile = '$mob', location = '$loc', qualification = '$quali', achievement = '$achiv' WHERE user_id = '$user'";
+		$query_status = mysqli_query($conn, $query_update_user);
+	}
+}
+
 // Prepare session temp for stamp editor
 function setStampTempEditor($var){
 	$_SESSION['stamp_temp_editor'] = $var;
@@ -231,8 +306,20 @@ function getUserId() {
 	}
 }
 
-function getUserName() {	
-	if (isset($_SESSION['userName'])) {
+function getUserName() {
+	if (isset($_SESSION['target_user_id'])) {
+		global $conn;
+		$user = $_SESSION['target_user_id'];
+		$query_name = "SELECT first_name FROM user WHERE user_id = '$user'";	    
+	    $query_status = mysqli_query($conn, $query_name);
+
+	    $name = mysqli_fetch_assoc($query_status)['first_name'];
+	    if ($name == "") {
+	    	echo $_SESSION['target_user_id'];
+	    } else {
+	    	echo $name;
+	    }
+	} elseif (isset($_SESSION['userName'])) {
 		echo $_SESSION['userName'];
 	}
 }
@@ -251,8 +338,34 @@ function displayMessage($var) {
 
 // Filling storyboard
 function getStoryboardPosts() {
-	// query should show posts from friends only--- change query
-	$query_posts = "SELECT * FROM stamp";
+	$me = $_SESSION['userId'];
+	$query_posts = "SELECT * FROM stamp WHERE user_id in ((SELECT partner_1 FROM relation WHERE partner_2 = '$me' AND relation_type = 'friend') OR (SELECT partner_2 FROM relation WHERE partner_1 = '$me' AND relation_type = 'friend')) ORDER BY date_created DESC";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_posts);
+    return $query_status;
+}
+
+function getUserPosts() {
+	if (isset($_SESSION['target_user_id'])) {
+		$user = $_SESSION['target_user_id'];	
+	} else {
+		$user = $_SESSION['userId'];	
+	}
+	$query_posts = "SELECT * FROM stamp WHERE user_id = '$user'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_posts);
+    return $query_status;
+}
+
+function getUserProfile() {
+	if (isset($_SESSION['target_user_id'])) {
+		$user = $_SESSION['target_user_id'];	
+	} else {
+		$user = $_SESSION['userId'];	
+	}
+	$query_posts = "SELECT * FROM user WHERE user_id = '$user'";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_posts);
@@ -267,6 +380,25 @@ function getStamp($var) {
     return $query_status;
 }
 
+function getNotifConnectionDetails() {
+	$to = $_SESSION['target_user_id'];
+	$by = $_SESSION['userId'];
+	$query_notif = "SELECT * FROM notification WHERE notif_to = '$to' AND notif_by = '$by'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_notif);
+    return $query_status;
+}
+
+function getNotificationDetails() {
+	$to = $_SESSION['userId'];
+	$query_notif = "SELECT * FROM notification WHERE notif_to = '$to' AND notif_status = 'pending'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_notif);
+    return $query_status;
+}
+
 function getStampComments($var) {
 	$query_comments = "SELECT * FROM comment WHERE stamp_sn = '$var'";
 
@@ -275,6 +407,9 @@ function getStampComments($var) {
     return $query_status;
 }
 
-
+// logout
+if( isset($_POST['btnLogOut']) ) {
+	session_destroy();
+}
 
 ?>

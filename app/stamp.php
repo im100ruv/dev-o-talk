@@ -17,6 +17,9 @@
 		</div>
 	    <div class="uk-navbar-item uk-navbar-right">
 	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
+	        <form method="POST" action="index.php">
+	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
+	        </form>
 	    </div>
 	</nav>
 	<a class="uk-text-small" href="storyboard.php"> < Back to Storyboard </a>

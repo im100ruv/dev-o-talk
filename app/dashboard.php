@@ -17,6 +17,9 @@
 		</div>
 	    <div class="uk-navbar-item uk-navbar-right">
 	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
+	        <form method="POST" action="index.php">
+	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
+	        </form>
 	    </div>
 	</nav>
 	<section class="uk-position-relative">
@@ -42,6 +45,38 @@
 			</div>
 		</div>
 	</section>
+
+	<div id="notifModal" class="uk-modal uk-flex-top" uk-modal>
+	    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical" uk-overflow-auto>
+	    	<p class="uk-modal-title">Your Notifications</p>
+	        <button class="uk-modal-close-default" type="button" uk-close></button>
+
+	        <!-- Modal content-->
+	        <?php
+	        	$notifs = getNotificationDetails();
+	        	$numRows = mysqli_num_rows($notifs);
+	        	if($numRows > 0) {
+	    			while($row =mysqli_fetch_assoc($notifs)) {
+	    				echo 
+	    				'<ul class="uk-list uk-list-striped">
+						    <li> 
+						    	<form method="POST" action="dashboard.php">
+						    		' . $row["notif_by"] . '&nbsp; requested to connect with you. 
+							    	<div class="uk-text-right">
+							    		<input type="text" name="hiddenValue" value="' . $row["notif_by"] . '" hidden />
+							    		<input type="submit" class="uk-button-primary uk-button-small" name="btnConfirmConnect" value="Connect" />
+							    	</div>
+						    	</form>
+						    </li>
+						</ul>';
+	    			}
+	    		} else {
+	    			echo 'No new notifications';
+	    		}
+	        ?>
+	    </div>
+	</div>
+
 	<section class="uk-section uk-position-relative">
 		<div class="uk-container uk-container-small uk-card uk-card-default">
 			<br>
@@ -53,10 +88,16 @@
 			        <a href="./storyboard.php"><div class="uk-card uk-card-secondary uk-card-body">Storyboard</div></a>
 			    </div>
 			    <div>
-			        <div class="uk-card uk-card-secondary uk-card-body">Notification</div>
+			        <div class="uk-card uk-card-secondary uk-card-body" uk-toggle="target: #notifModal">Notifications 
+			        	<?php 
+			        		if($numRows > 0) {
+			        			echo '(' . $numRows . ')';
+			        		} 
+			        	?>		
+			        </div>
 			    </div>
 			    <div>
-			        <div class="uk-card uk-card-secondary uk-card-body">Stamp</div>
+			        <a href="./timeline.php"><div class="uk-card uk-card-secondary uk-card-body">Stamps</div></a>
 			    </div>
 			    <div>
 			        <div class="uk-card uk-card-secondary uk-card-body">Team</div>

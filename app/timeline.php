@@ -16,6 +16,11 @@
 	        <a class="uk-navbar-item uk-logo" href="dashboard.php">{dev-o-talk}</a>
 		</div>
 	    <div class="uk-navbar-item uk-navbar-right">
+	    	<form method="POST" action="timeline.php">
+	    		<input class="uk-text-small" type="text" name="targetUser" />
+	    		<input class="uk-button-small uk-button-primary" type="submit" name="btnUserSearch" value="Search" />
+	    		<input class="uk-button-small uk-button-secondary" type="submit" name="btnSelfSearch" value="See my own" />
+	    	</form>
 	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
 	        <form method="POST" action="index.php">
 	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
@@ -23,13 +28,39 @@
 	    </div>
 	</nav>
 
+	<section class="uk-position-relative">
+		<div class="uk-section" style="background-color: #2F9A44; background-size: 100%; height: 250px;">
+			<div class="uk-grid uk-grid-divider" data-uk-grid-margin>
+				<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
+					<div class="uk-grid">
+						<div class="uk-width-1-2"></div>
+						<div class="uk-width-1-2">
+							<img class="uk-navbar-item uk-align-right" src="../assets/img/kb.png">
+						</div>
+					</div>					
+				</div>
+				<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
+					<div class="uk-grid">
+						<div class="uk-width-1-2">
+							<h2 class="uk-heading-large" style="color: #FFFFFF"><?php getUserName() ?></h2>
+							<h5>iOS developer</h5>
+						</div>
+						<div class="uk-width-1-2">
+							<a href="profile.php"><button class="uk-button-primary uk-button-large"> View Profile </button></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<section class="uk-section uk-position-relative">
 		<div class="uk-container uk-container-small uk-card uk-card-default">
 			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
 			    <div class="uk-width-1-1 uk-first-column">
 			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<form class="uk-form" method="POST" action="storyboard.php">
-			    		<input type="text" name="fromPageHidden" value="storyboard" hidden />
+			    	<form class="uk-form" method="POST" action="timeline.php">
+			    		<input type="text" name="fromPageHidden" value="profile" hidden />
 			    		<div class="uk-margin">
 				            <textarea id="stampText" class="uk-textarea" rows="8" placeholder="Write your stamp here.." name="stampText"><?php getTextArea(); ?></textarea>
 				        </div>
@@ -42,7 +73,7 @@
 	</section>
 	
 	<?php 
-		$result_stamps = getStoryboardPosts();
+		$result_stamps = getUserPosts();
         if(mysqli_num_rows($result_stamps) > 0) {
           	while($row =mysqli_fetch_assoc($result_stamps)) { 
           		$result_comments = getStampComments($row['sn']);
@@ -69,7 +100,7 @@
 					    <div></div>
 					</div>';
 					if(mysqli_num_rows($result_comments) > 0) {
-			          	while($row_comments =mysqli_fetch_assoc($result_comments)) { 
+			          	while($row_comments = mysqli_fetch_assoc($result_comments)) { 
 							echo
 							'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
 								<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
@@ -104,89 +135,6 @@
 		  	}
 		}
 	?>
-
-<!-- ================= Demo containers ================================================== -->
-	<!-- <section class="uk-section uk-position-relative">
-		<div class="uk-container uk-container-small uk-card uk-card-default">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-large">Kumar Bhargav</label>
-			    		<label class="uk-text-small">&nbsp; posted</label>
-			    	</div>
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-small">2 min ago</label>	
-			    	</div>
-			    	<div class="uk-section">
-		    			<p>
-		    				<b>What is the best way of checking if an object property in Javascript is undefined?</b>
-		    				<br>I tried this:
-		    			</p>
-	    				<code><pre>
-		    				if (typeof something === "undefined") {
-		    					alert("something is undefined");
-		    				}
-		    			</pre></code>
-		    			But it is not working for me.
-			    	</div>
-			    </div>
-			</div>
-		    <div class="uk-width-5-6"></div>
-		    <label class="uk-width-1-6 uk-align-right"> 2 comments </label>
-		    <div></div>
-		</div>
-		<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-large">Bharat Prasad</label>
-			    		<label class="uk-text-small">&nbsp; 1 min ago</label>
-			    	</div>
-			    	<div class="uk-section">
-		    			<p>
-		    				You are trying to compare two objects. You should replace <code>===</code> with <code>==</code>
-		    			</p>
-	    				<code><pre>
-		    				if (typeof something == "undefined") {
-		    					alert("something is undefined");
-		    				}
-		    			</pre></code>
-		    			Also call the function for string comparision as:
-		    			<code><pre>
-		    				if "something".equals(String) {
-			    				console.log("everything is alright!")
-			    			}
-		    			</pre></code>
-			    	</div>
-			    </div>
-			</div>
-		    <div></div>
-		</div>
-
-		<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-large">Sweta Roy</label>
-			    		<label class="uk-text-small">&nbsp; 1 min ago</label>
-			    	</div>
-			    	<div class="uk-section uk-section-small">
-		    			<p>
-		    				Thank you Bharat for your tip. I was stuck with this part and your suggestions solved my problem.
-		    			</p>
-			    	</div>
-			    </div>
-			</div>
-		    <div></div>
-		    <hr>
-		    <div class="uk-width-5-6"></div>
-		    <label class="uk-width-1-6 uk-align-center" style="color: green"> Add a comment </label>
-		    <div></div>
-		</div>
-	</section> -->
 
 	<footer style="position: relative; padding: 60px 0 0 0; background-color: #202020;">
 		<div class="bottom-line">
