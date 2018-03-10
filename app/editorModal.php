@@ -10,7 +10,7 @@
 	<script src="../node_modules/uikit/dist/js/uikit.min.js"></script>
 	<script src="../node_modules/uikit/dist/js/uikit-icons.min.js"></script>
 </head>
-<body onload="UIkit.modal('editorModal').show();">
+<body>
 	<div id="editorModal" class="uk-modal-container" uk-modal>
 	    <div class="uk-modal-dialog uk-modal-body">
 	        <!-- Modal content-->
@@ -24,9 +24,9 @@
         	</div>
 	    </div>
 	</div>
-	<button class="uk-button uk-button-secondary uk-align-left" uk-toggle="target: #editorModal">Editor</button>
+	<button id="edtModal" class="uk-button uk-button-secondary uk-align-left" uk-toggle="target: #editorModal">Editor</button>
 	<script>
-		document.getElementById('editorModal').show();
+		document.getElementById('edtModal').click();
 	</script>
 </body>
 </html>

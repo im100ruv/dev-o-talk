@@ -17,7 +17,7 @@
 		</div>
 	    <div class="uk-navbar-item uk-navbar-right">
 	    	<form method="POST" action="profile.php">
-	    		<input class="uk-text-small" type="text" name="targetUser" />
+	    		<input class="uk-text-small" type="text" name="targetUser" placeholder="type userid" />
 	    		<input class="uk-button-small uk-button-primary" type="submit" name="btnUserSearch" value="Search" />
 	    		<input class="uk-button-small uk-button-secondary" type="submit" name="btnSelfSearch" value="See my own" />
 	    	</form>
@@ -57,11 +57,14 @@
 	    								if($row['notif_status'] == 'pending') {
 	    									echo 
 	    									'<button class="uk-button-primary uk-button-large"> Connection Requested </button>';
-	    								} elseif($row['notif_status'] == 'approved') {
+	    								} elseif($row['notif_status'] == 'accepted') {
 	    									echo 
 	    									'<button class="uk-button-primary uk-button-large"> Connected </button>';
 	    									echo 
 	    									'<input type="submit" class="uk-button-danger uk-button-small" name="btnDisconnectUser" value="Disconnect" />';
+	    								} elseif($row['notif_status'] == 'deleted') {
+	    									echo 
+	    									'<input type="submit" class="uk-button-primary uk-button-large" name="btnConnectUser" value="Connect Now" />';
 	    								}
 	    							} else {
 	    								echo 
@@ -125,58 +128,62 @@
 	<?php 
 		$result_profile = getUserProfile();
         if(mysqli_num_rows($result_profile) > 0) {
-          	while($row =mysqli_fetch_assoc($result_profile)) { 
+          	while($userRow =mysqli_fetch_assoc($result_profile)) { 
 				echo
 				'<section class="uk-section uk-position-relative">
 					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Username </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['user_id'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['user_id'] . ' </h3> </div>
 						</div>
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Firstname </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['first_name'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['first_name'] . ' </h3> </div>
 						</div>
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Lastname </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['last_name'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['last_name'] . ' </h3> </div>
 						</div>
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Nickname </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['nick_name'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['nick_name'] . ' </h3> </div>
 						</div>
 					</div>
 					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Email </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['email'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['email'] . ' </h3> </div>
 						</div>
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Mobile </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['mobile'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['mobile'] . ' </h3> </div>
 						</div>
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Location </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['location'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['location'] . ' </h3> </div>
 						</div>
 					</div>
 					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Qualification </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['qualification'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['qualification'] . ' </h3> </div>
 						</div>
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Achievement </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['achievement'] . ' </h3> </div>
+							<div class="uk-width-3-4"> <h3> ' . $userRow['achievement'] . ' </h3> </div>
 						</div>
-					</div>
-					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
-						<div class="uk-grid" uk-grid>
-							<div class="uk-width-1-4"> <h3> Last Login </h3> </div>
-							<div class="uk-width-3-4"> <h3> ' . $row['last_login'] . ' </h3> </div>
-						</div>
-					</div>
-				</section>';
+					</div>';
+					if(!isset($_SESSION['target_user_id'])) {
+						echo 
+						'<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+							<div class="uk-grid" uk-grid>
+								<div class="uk-width-1-4"> <h3> Last Login </h3> </div>
+								<div class="uk-width-3-4"> <h3> ' . $userRow['last_login'] . ' </h3> </div>
+							</div>
+						</div>';
+					}
+					
+				echo '</section>';
 			}
 		}
 	?>

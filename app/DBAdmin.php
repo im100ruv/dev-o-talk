@@ -27,6 +27,8 @@ $conn = mysqli_connect(DB_URL, DB_USER, DB_PASSWORD, DATABASE);
 // $_SESSION['comment_temp_textarea']
 // $_SESSION['curr_stamp_sn']
 // $_SESSION['target_user_id']
+// $_SESSION['target_team_id']
+// $_SESSION['editorFromPage']
 // ===============================================================
 
 
@@ -38,26 +40,38 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$password = mysqli_real_escape_string($conn, $_POST['password']);
 		$confirmPassword = mysqli_real_escape_string($conn, $_POST['confirmPassword']);
 
-		$query_find = "SELECT * FROM user WHERE user_id = '$user_id'";
-	    $query_status = mysqli_query($conn, $query_find);
-	    // print_r($query_status);
+		if(!($user_id == "")) {
+			if(!($password == "") && !($confirmPassword == "") && !strcmp($password, $confirmPassword)) {
+				$query_find = "SELECT * FROM user WHERE user_id = '$user_id'";
+			    $query_status = mysqli_query($conn, $query_find);
+			    // print_r($query_status);
 
-	    if(mysqli_num_rows($query_status) == 0) {
-	    	$query_insert = "INSERT INTO user (user_id, email, date_created, last_login, user_type, active_status)
-							VALUES ('$user_id', '$email', NOW(), NOW(), 'general', '1')";
+				if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+				    if(mysqli_num_rows($query_status) == 0) {
+				    	$query_insert = "INSERT INTO user (user_id, email, date_created, last_login, user_type, active_status)
+										VALUES ('$user_id', '$email', NOW(), NOW(), 'general', '1')";
 
-			$query_status = mysqli_query($conn, $query_insert);
-			if($query_status) {
-				$query_insert = "INSERT INTO login (user_id, password) VALUES ('$user_id','$password')";
-				$query_status = mysqli_query($conn, $query_insert);
-				displayMessage("Register successful.");
-				prepareSessionVar($user_id);
+						$query_status = mysqli_query($conn, $query_insert);
+						if($query_status) {
+							$query_insert = "INSERT INTO login (user_id, password) VALUES ('$user_id','$password')";
+							$query_status = mysqli_query($conn, $query_insert);
+							displayMessage("Register successful.");
+							prepareSessionVar($user_id);
+						} else {
+							displayMessage("Registration error...! Please try after sometime.");
+						}
+				    } else {
+				    	displayMessage("User already exists.");
+				    }
+				} else {
+					displayMessage("Please enter valid email address.");
+				}
 			} else {
-				displayMessage("Registration error...! Please try after sometime.");
+				displayMessage("Passwords not matched.");
 			}
-	    } else {
-	    	displayMessage("User already exists.");
-	    }
+		} else {
+			displayMessage('Userid required.');
+		}
 	}
 }
 
@@ -115,8 +129,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$user = $_SESSION['userId'];
 		$stamp = $_SESSION['stamp_temp_textarea'];
 
-		$query_insert_stamp = "INSERT INTO stamp (user_id, message, team_id, date_created) 
-								VALUES ('$user', '$stamp', 'refTeam', NOW())";
+		if(isset($_SESSION['target_team_id'])) {
+			$team = $_SESSION['target_team_id'];
+			$query_insert_stamp = "INSERT INTO stamp (user_id, message, team_id, date_created) 
+								VALUES ('$user', '$stamp', '$team', NOW())";
+		} else {
+			$query_insert_stamp = "INSERT INTO stamp (user_id, message, date_created) 
+								VALUES ('$user', '$stamp', NOW())";
+		}
+
 		$query_status = mysqli_query($conn, $query_insert_stamp);
 
 		unset($_SESSION['stamp_temp_textarea']);
@@ -186,7 +207,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 // Set Target user (searched user)
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if( isset($_POST['btnUserSearch']) ) {
-		$_SESSION['target_user_id'] = $_POST['targetUser'];
+		if(isValidUser($_POST['targetUser']))
+			$_SESSION['target_user_id'] = $_POST['targetUser'];
+		else
+			displayMessage('user not found');
 	} elseif (isset($_POST['btnSelfSearch'])) {
 		if( isset($_SESSION['target_user_id']) ) {
 			unset($_SESSION['target_user_id']);
@@ -200,8 +224,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$notifToId = $_SESSION['target_user_id'];
 		$notifById = $_SESSION['userId'];
 
-		$query_insert_notif = "INSERT INTO notification (notif_by, notif_to, notif_date, notif_status) 
-								VALUES ('$notifById', '$notifToId', NOW(), 'pending')";
+		$query_insert_notif = "INSERT INTO notification (notif_by, notif_to, notif_by_type, notif_date, notif_status) 
+								VALUES ('$notifById', '$notifToId', 'individual', NOW(), 'pending')";
+		$query_status = mysqli_query($conn, $query_insert_notif);
+	}
+}
+
+// Set notification table for team invite
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnInviteToTeam']) ) {
+		$notifToId = $_POST['newMember'];
+		$notifById = $_SESSION['target_team_id'];
+
+		$query_insert_notif = "INSERT INTO notification (notif_by, notif_to, notif_by_type, notif_date, notif_status) 
+								VALUES ('$notifById', '$notifToId', 'team', NOW(), 'pending')";
 		$query_status = mysqli_query($conn, $query_insert_notif);
 	}
 }
@@ -209,20 +245,57 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 // Make relation between users
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if( isset($_POST['btnConfirmConnect']) ) {
-		$notifById = $_POST['hiddenValue'];
+		$notifById = $_POST['hiddenByValue'];
+		$notifByTypeId = $_POST['hiddenByTypeValue'];
 		$notifToId = $_SESSION['userId'];
 
 		$query_update_notif = "UPDATE notification SET notif_status = 'accepted' WHERE notif_to = '$notifToId' AND notif_by = '$notifById'";
 		$query_status = mysqli_query($conn, $query_update_notif);
 
 		if($query_status) {
+			if($notifByTypeId == 'individual') {
+				$relType = 'friend';
+			} elseif ($notifByTypeId == 'team') {
+				$relType = 'member';
+			}
 			$query_insert_relation = "INSERT INTO relation (partner_1, partner_2, relation_type, date_related, relation_status) 
-										VALUES ('$notifById', '$notifToId', 'friend', NOW(), 'connected')";
+										VALUES ('$notifById', '$notifToId', '$relType', NOW(), 'connected')";
 			$query_status = mysqli_query($conn, $query_insert_relation);
 
 			$msg = "Congratulation! You are now connected to " . $notifById . ".";
+			header("Location: dashboard.php");
 			displayMessage($msg);
 		}
+	}
+}
+
+// View connection request profile
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnViewProfile']) ) {
+		$notifById = $_POST['hiddenByValue'];
+		$notifByTypeId = $_POST['hiddenByTypeValue'];
+
+		if($notifByTypeId == 'individual') {
+			$_SESSION['target_user_id'] = $notifById;
+			header("Location: profile.php");
+
+		} elseif ($notifByTypeId == 'team') {
+			$_SESSION['target_team_id'] = $notifById;
+			header("Location: team.php");
+		}
+	}
+}
+
+// Set team according to selection
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnMyTeam']) ) {
+		$_SESSION['target_team_id'] = $_POST['btnMyTeam'];
+	}
+}
+
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnMyFriend']) ) {
+		$_SESSION['target_user_id'] = $_POST['btnMyFriend'];
 	}
 }
 
@@ -254,6 +327,25 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 		$query_update_user = "UPDATE user SET first_name = '$fname', last_name = '$lname', nick_name = '$nname', mobile = '$mob', location = '$loc', qualification = '$quali', achievement = '$achiv' WHERE user_id = '$user'";
 		$query_status = mysqli_query($conn, $query_update_user);
+	}
+}
+
+// Create a team
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnTeamCreate']) ) {
+		$user = $_SESSION['userId'];
+		$tname = $_POST['teamName'];
+		$tdesc = $_POST['teamDesc'];
+
+		$query_insert_team = "INSERT INTO team (team_id, team_desc, team_admin_id, date_created, team_status) 
+								VALUES ('$tname', '$tdesc', '$user', NOW(), 'active')";
+		$query_status = mysqli_query($conn, $query_insert_team);
+
+		$query_insert_relation = "INSERT INTO relation (partner_1, partner_2, relation_type, date_related, relation_status) 
+										VALUES ('$tname', '$user', 'member', NOW(), 'connected')";
+		$query_status = mysqli_query($conn, $query_insert_relation);
+
+		$_SESSION['target_team_id'] = $tname;
 	}
 }
 
@@ -330,16 +422,31 @@ function getUserEmail() {
 	}
 }
 
+// get team name based on selection
+function getTeamName() {	
+	if (isset($_SESSION['target_team_id'])) {
+		echo $_SESSION['target_team_id'];
+	}
+}
+
 function displayMessage($var) {
 	echo "<script> alert('$var'); </script>";
 }
 
-
-
 // Filling storyboard
 function getStoryboardPosts() {
 	$me = $_SESSION['userId'];
-	$query_posts = "SELECT * FROM stamp WHERE user_id in ((SELECT partner_1 FROM relation WHERE partner_2 = '$me' AND relation_type = 'friend') OR (SELECT partner_2 FROM relation WHERE partner_1 = '$me' AND relation_type = 'friend')) ORDER BY date_created DESC";
+	$query_posts = "SELECT * FROM stamp WHERE team_id IN ('') AND (user_id IN (SELECT partner_1 FROM relation WHERE partner_2 = '$me' AND relation_type = 'friend' AND relation_status = 'connected') OR user_id IN (SELECT partner_2 FROM relation WHERE partner_1 = '$me' AND relation_type = 'friend' AND relation_status = 'connected') OR user_id = '$me') ORDER BY date_created DESC";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_posts);
+    return $query_status;
+}
+
+// Filling team storyboard
+function getTeamStoryboard() {
+	$teamName = $_SESSION['target_team_id'];
+	$query_posts = "SELECT * FROM stamp WHERE team_id = '$teamName' ORDER BY date_created DESC";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_posts);
@@ -348,11 +455,12 @@ function getStoryboardPosts() {
 
 function getUserPosts() {
 	if (isset($_SESSION['target_user_id'])) {
-		$user = $_SESSION['target_user_id'];	
+		$user = $_SESSION['target_user_id'];
+		$query_posts = "SELECT * FROM stamp WHERE user_id = '$user' AND team_id = ''";	
 	} else {
-		$user = $_SESSION['userId'];	
+		$user = $_SESSION['userId'];
+		$query_posts = "SELECT * FROM stamp WHERE user_id = '$user'";	
 	}
-	$query_posts = "SELECT * FROM stamp WHERE user_id = '$user'";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_posts);
@@ -383,7 +491,7 @@ function getStamp($var) {
 function getNotifConnectionDetails() {
 	$to = $_SESSION['target_user_id'];
 	$by = $_SESSION['userId'];
-	$query_notif = "SELECT * FROM notification WHERE notif_to = '$to' AND notif_by = '$by'";
+	$query_notif = "SELECT * FROM notification WHERE (notif_to = '$to' AND notif_by = '$by') OR (notif_to = '$by' AND notif_by = '$to')";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_notif);
@@ -399,12 +507,90 @@ function getNotificationDetails() {
     return $query_status;
 }
 
+// get team details
+function getTeamDetails() {
+	$team = $_SESSION['target_team_id'];
+	$query_team = "SELECT * FROM team WHERE team_id = '$team' AND team_status = 'active'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_team);
+    return $query_status;
+}
+
+function getMyTeams() {
+	$me = $_SESSION['userId'];
+	$query_teams = "SELECT partner_1 FROM relation WHERE partner_2 = '$me' AND relation_type = 'member' AND relation_status = 'connected'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_teams);
+    return $query_status;
+}
+
+function getMyFriends() {
+	$me = $_SESSION['userId'];
+	$query_friends = "SELECT partner_1 FROM relation WHERE partner_2 = '$me' AND relation_type = 'friend' AND relation_status = 'connected' UNION SELECT partner_2 FROM relation WHERE partner_1 = '$me' AND relation_type = 'friend' AND relation_status = 'connected'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_friends);
+    return $query_status;
+}
+
+// Get team members
+function getTeamMembers() {
+	$team = $_SESSION['target_team_id'];
+	$query_teams = "SELECT partner_2 FROM relation WHERE partner_1 = '$team' AND relation_type = 'member' AND relation_status = 'connected'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_teams);
+    return $query_status;
+}
+
 function getStampComments($var) {
 	$query_comments = "SELECT * FROM comment WHERE stamp_sn = '$var'";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_comments);
     return $query_status;
+}
+
+// check user in team
+function isUserInTeam() {
+	$me = $_SESSION['userId'];
+	$team = $_SESSION['target_team_id'];
+	$query_user = "SELECT partner_2 FROM relation WHERE partner_1 = '$team' AND partner_2 = '$me' AND relation_type = 'member' AND relation_status = 'connected'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_user);
+    if(mysqli_num_rows($query_status) > 0) {
+    	return true;
+    }
+    return false;
+}
+
+// check user in user
+function isValidUser($var) {
+	$query_user = "SELECT user_id FROM user WHERE user_id = '$var'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_user);
+    if(mysqli_num_rows($query_status) > 0) {
+    	return true;
+    }
+    return false;
+}
+
+// check user is team admin
+function isTeamAdmin() {
+	$me = $_SESSION['userId'];
+	$team = $_SESSION['target_team_id'];
+	$query_admin = "SELECT team_admin_id FROM team WHERE team_id = '$team' AND team_admin_id = '$me' AND team_status = 'active'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_admin);
+    if(mysqli_num_rows($query_status) > 0) {
+    	return true;
+    }
+    return false;
 }
 
 // logout

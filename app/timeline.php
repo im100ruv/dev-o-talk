@@ -17,7 +17,7 @@
 		</div>
 	    <div class="uk-navbar-item uk-navbar-right">
 	    	<form method="POST" action="timeline.php">
-	    		<input class="uk-text-small" type="text" name="targetUser" />
+	    		<input class="uk-text-small" type="text" name="targetUser" placeholder="type userid" />
 	    		<input class="uk-button-small uk-button-primary" type="submit" name="btnUserSearch" value="Search" />
 	    		<input class="uk-button-small uk-button-secondary" type="submit" name="btnSelfSearch" value="See my own" />
 	    	</form>
