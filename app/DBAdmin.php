@@ -22,6 +22,8 @@ $conn = mysqli_connect(DB_URL, DB_USER, DB_PASSWORD, DATABASE);
 // $_SESSION['userId']
 // $_SESSION['userEmail']
 // $_SESSION['userType']
+// $_SESSION['userImg']
+// $_SESSION['userNickName']
 // $_SESSION['stamp_temp_editor']
 // $_SESSION['stamp_temp_textarea']
 // $_SESSION['comment_temp_textarea']
@@ -42,18 +44,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 		if(!($user_id == "")) {
 			if(!($password == "") && !($confirmPassword == "") && !strcmp($password, $confirmPassword)) {
-				$query_find = "SELECT * FROM user WHERE user_id = '$user_id'";
-			    $query_status = mysqli_query($conn, $query_find);
-			    // print_r($query_status);
 
 				if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+					$query_find = "SELECT * FROM user WHERE user_id = '$user_id'";
+				    $query_status = mysqli_query($conn, $query_find);
+				    
 				    if(mysqli_num_rows($query_status) == 0) {
 				    	$query_insert = "INSERT INTO user (user_id, email, date_created, last_login, user_type, active_status)
 										VALUES ('$user_id', '$email', NOW(), NOW(), 'general', '1')";
 
 						$query_status = mysqli_query($conn, $query_insert);
 						if($query_status) {
-							$query_insert = "INSERT INTO login (user_id, password) VALUES ('$user_id','$password')";
+							$encPass = md5($password);
+							$query_insert = "INSERT INTO login (user_id, password) VALUES ('$user_id','$encPass')";
 							$query_status = mysqli_query($conn, $query_insert);
 							displayMessage("Register successful.");
 							prepareSessionVar($user_id);
@@ -75,13 +79,60 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 }
 
+//Changing Password
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if( isset($_POST['btnChangePass']) ) {
+		$oldPass = mysqli_real_escape_string($conn, $_POST['oldPassword']);
+		$newPass = mysqli_real_escape_string($conn, $_POST['newPassword']);
+		$cnfPass = mysqli_real_escape_string($conn, $_POST['cnfPassword']);
+
+		$user = $_SESSION['userId'];
+
+		if(!($oldPass == "")) {
+			if(!($newPass == "") && !($cnfPass == "") && !strcmp($newPass, $cnfPass)) {
+
+				if (strcmp($oldPass, $newPass)) {
+
+					$encOld = md5($oldPass);
+					$encNew = md5($newPass);
+
+					$query_select = "SELECT * FROM login WHERE user_id = '$user' AND password = '$encOld'";
+					$query_status = mysqli_query($conn, $query_select);
+				    
+				    if(!(mysqli_num_rows($query_status) == 0)) {
+				    	$query_update = "UPDATE login SET password = '$encNew' WHERE user_id = '$user'";
+
+						$query_status = mysqli_query($conn, $query_update);
+						if($query_status) {
+							displayMessage("Update successful.");
+							header('Location: index.php');
+						} else {
+							displayMessage("Update error...! Please try after sometime.");
+						}
+				    } else {
+				    	displayMessage("Worng old password entered.");
+				    }
+				} else {
+					displayMessage("Old and new passwords cannot match.");
+				}
+			} else {
+				displayMessage("Passwords not matched.");
+			}
+		} else {
+			displayMessage('Old password required.');
+		}
+	}
+}
+
 //Login user
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if( isset($_POST['btnLogin']) ) {
 		$user_id = mysqli_real_escape_string($conn, $_POST['username']);
 		$password = mysqli_real_escape_string($conn, $_POST['password']);
 
-		$query_select = "SELECT * FROM login WHERE user_id = '$user_id' AND password = '$password'";
+		$encPass = md5($password);
+
+		$query_select = "SELECT * FROM login WHERE user_id = '$user_id' AND password = '$encPass'";
 		$query_status = mysqli_query($conn, $query_select);
 		// print_r($query_status);
 
@@ -111,12 +162,15 @@ function prepareSessionVar($user_id) {
           $_SESSION['userId'] = $row['user_id'];
           $_SESSION['userEmail'] = $row['email'];
           $_SESSION['userType'] = $row['user_type'];
+          $_SESSION['userImg'] = $row['picture'];
+          $_SESSION['userNickName'] = $row['nick_name'];
         }
         // if($_SESSION['type'] == 'Admin')
         //   header('Location: admin.php');
         // else
         //   header('Location: user.php');
-        header('Location: dashboard.php');
+        header('Location: app/dashboard.php');
+        // echo '<script>windows.location.href = "dashboard.php";</script>';
   	}
 }
 
@@ -176,6 +230,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 }
 
+// Save textarea and invoke editor for comment purpose
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if( isset($_POST['btnEditorComment']) ) {
 		$stamp_text = $_POST['stampText'];
@@ -224,9 +279,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$notifToId = $_SESSION['target_user_id'];
 		$notifById = $_SESSION['userId'];
 
-		$query_insert_notif = "INSERT INTO notification (notif_by, notif_to, notif_by_type, notif_date, notif_status) 
-								VALUES ('$notifById', '$notifToId', 'individual', NOW(), 'pending')";
-		$query_status = mysqli_query($conn, $query_insert_notif);
+		$query_check = "SELECT * FROM notification WHERE ((notif_to = '$notifToId' AND notif_by = '$notifById') OR (notif_to = '$notifById' AND notif_by = '$notifToId')) AND notif_status = 'pending'";
+		$query_status = mysqli_query($conn, $query_check);
+
+		if(!(mysqli_num_rows($query_status) > 0)) {
+			$query_insert_notif = "INSERT INTO notification (notif_by, notif_to, notif_by_type, notif_date, notif_status) 
+									VALUES ('$notifById', '$notifToId', 'individual', NOW(), 'pending')";
+			$query_status = mysqli_query($conn, $query_insert_notif);	
+		}
 	}
 }
 
@@ -293,6 +353,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 }
 
+// Set team according to selection
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if( isset($_POST['btnMyFriend']) ) {
 		$_SESSION['target_user_id'] = $_POST['btnMyFriend'];
@@ -317,16 +378,61 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if( isset($_POST['btnProfileForm']) ) {
 		$user = $_SESSION['userId'];
-		$fname = $_POST['firstName'];
-		$lname = $_POST['lastName'];
-		$nname = $_POST['nickName'];
-		$mob = $_POST['mobile'];
-		$loc = $_POST['location'];
-		$quali = $_POST['qualification'];
-		$achiv = $_POST['achievement'];
 
-		$query_update_user = "UPDATE user SET first_name = '$fname', last_name = '$lname', nick_name = '$nname', mobile = '$mob', location = '$loc', qualification = '$quali', achievement = '$achiv' WHERE user_id = '$user'";
+		$usrProf = getUserProfile();
+		$usrProfRow = mysqli_fetch_assoc($usrProf);
+
+		$fname = ($_POST['firstName'] == "") ? $usrProfRow['first_name'] : $_POST['firstName'];
+		$lname = ($_POST['lastName'] == "") ? $usrProfRow['last_name'] : $_POST['lastName'];
+		$nname = ($_POST['nickName'] == "") ? $usrProfRow['nick_name'] : $_POST['nickName'];
+		$mob = ($_POST['mobile'] == "") ? $usrProfRow['mobile'] : $_POST['mobile'];
+		$loc = ($_POST['location'] == "") ? $usrProfRow['location'] : $_POST['location'];
+		$quali = ($_POST['qualification'] == "") ? $usrProfRow['qualification'] : $_POST['qualification'];
+		$achiv = ($_POST['achievement'] == "") ? $usrProfRow['achievement'] : $_POST['achievement'];
+
+		$imgVal = $usrProfRow['picture'];
+
+		if (!empty($_FILES['imgInput']['name'])) {
+		    $ext = pathinfo($_FILES['imgInput']['name'], PATHINFO_EXTENSION);
+		    $picName = $_FILES['imgInput']['name'];
+		    $tmp_name = $_FILES["imgInput"]["tmp_name"];
+		    $query_num = "SELECT MAX(sn) FROM picture";
+		    $query_status = mysqli_query($conn, $query_num);
+		    $val = mysqli_fetch_assoc($query_status)['MAX(sn)'];
+
+		    $num = ($val > 0 ? $val + 1 : 1);
+		    if($ext == 'png') {
+		        if (isset($tmp_name)) {
+		            if(!empty($tmp_name)) {
+		                $location = '../assets/usrImg/';
+		                $full_name = $num.'.'.$ext;
+		                if(file_exists($location)){
+		                	if(move_uploaded_file($tmp_name, $location.$full_name)) {
+		                		$query_insert_pic = "INSERT INTO picture (img_name, user_id, date_uploaded) VALUES ('$full_name', '$user', NOW())";
+		                		$query_status = mysqli_query($conn, $query_insert_pic);
+
+		                		if($query_status) {
+		                			$imgVal = $num;
+		                			$_SESSION['userImg'] = $num;
+		                			displayMessage('Image uploaded successfully.');	
+		                		} else {
+			                		displayMessage('Image upload unsuccessful.');
+			                	}
+			                }	
+		                }
+		            }
+		        }
+		    } else {
+		    	displayMessage('Pleae upload only png images.');
+		    }
+		}
+		$query_update_user = "UPDATE user SET first_name = '$fname', last_name = '$lname', nick_name = '$nname', mobile = '$mob', location = '$loc', qualification = '$quali', achievement = '$achiv', picture = '$imgVal' WHERE user_id = '$user'";
 		$query_status = mysqli_query($conn, $query_update_user);
+
+		$_SESSION['userNickName'] = $nname;
+		if(!($fname == "")) {
+			$_SESSION['userName'] = $fname;
+		}
 	}
 }
 
@@ -384,13 +490,6 @@ function getCommentTextArea(){
 	}
 }
 
-// function getStampTempEditor(){
-// 	echo $_SESSION['stamp_temp_editor'];
-// }
-
-// function getStampTempTextarea(){
-// 	echo $_SESSION['stamp_temp_textarea'];
-// }
 
 function getUserId() {	
 	if (isset($_SESSION['userId'])) {
@@ -398,6 +497,7 @@ function getUserId() {
 	}
 }
 
+// Name to display based on firstname availability
 function getUserName() {
 	if (isset($_SESSION['target_user_id'])) {
 		global $conn;
@@ -414,6 +514,63 @@ function getUserName() {
 	} elseif (isset($_SESSION['userName'])) {
 		echo $_SESSION['userName'];
 	}
+}
+
+function getNickName() {
+	$nick = $_SESSION["userNickName"];
+
+	if(isset($_SESSION['target_user_id'])) {
+		$nick = $_SESSION["target_user_id"];	
+	}
+	
+    if ($nick == "") {
+    	echo "A dev-o-talk user";
+    }
+    echo $nick;
+}
+
+function getUserImage() {
+	$img = $_SESSION["userImg"];
+    if ($img == "") {
+    	return "defaultUser";
+    }
+    return $img;
+}
+
+// profile picture for self or team
+function getTargetImage() {
+	global $conn;
+
+	if (isset($_SESSION['target_user_id'])) {
+		$user = $_SESSION['target_user_id'];
+	} elseif (isset($_SESSION['target_team_id'])) {
+		return "defaultTeam";
+	} else {
+		$user = $_SESSION['userId'];
+	}
+	
+	$query_img = "SELECT picture FROM user WHERE user_id = '$user'";	    
+    $query_status = mysqli_query($conn, $query_img);
+
+    $img = mysqli_fetch_assoc($query_status)['picture'];
+    if ($img == "") {
+    	return "defaultUser";
+    }
+    return $img;
+}
+
+// profile image of other users
+function getProfileImage($usr) {
+	$query_img = "SELECT picture FROM user WHERE user_id='$usr'";
+
+    global $conn;
+    $query_status = mysqli_query($conn, $query_img);
+    
+    $img = mysqli_fetch_assoc($query_status)['picture'];
+    if ($img == "") {
+    	return "defaultUser";
+    }
+    return $img;
 }
 
 function getUserEmail() {	
@@ -456,10 +613,10 @@ function getTeamStoryboard() {
 function getUserPosts() {
 	if (isset($_SESSION['target_user_id'])) {
 		$user = $_SESSION['target_user_id'];
-		$query_posts = "SELECT * FROM stamp WHERE user_id = '$user' AND team_id = ''";	
+		$query_posts = "SELECT * FROM stamp WHERE user_id = '$user' AND team_id = '' ORDER BY date_created DESC";	
 	} else {
 		$user = $_SESSION['userId'];
-		$query_posts = "SELECT * FROM stamp WHERE user_id = '$user'";	
+		$query_posts = "SELECT * FROM stamp WHERE user_id = '$user' ORDER BY date_created DESC";	
 	}
 
     global $conn;
@@ -491,7 +648,7 @@ function getStamp($var) {
 function getNotifConnectionDetails() {
 	$to = $_SESSION['target_user_id'];
 	$by = $_SESSION['userId'];
-	$query_notif = "SELECT * FROM notification WHERE (notif_to = '$to' AND notif_by = '$by') OR (notif_to = '$by' AND notif_by = '$to')";
+	$query_notif = "SELECT * FROM notification WHERE (notif_to = '$to' AND notif_by = '$by') OR (notif_to = '$by' AND notif_by = '$to') ORDER BY sn DESC";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_notif);
@@ -528,7 +685,7 @@ function getMyTeams() {
 
 function getMyFriends() {
 	$me = $_SESSION['userId'];
-	$query_friends = "SELECT partner_1 FROM relation WHERE partner_2 = '$me' AND relation_type = 'friend' AND relation_status = 'connected' UNION SELECT partner_2 FROM relation WHERE partner_1 = '$me' AND relation_type = 'friend' AND relation_status = 'connected'";
+	$query_friends = "SELECT partner_1 AS friends FROM relation WHERE partner_2 = '$me' AND relation_type = 'friend' AND relation_status = 'connected' UNION SELECT partner_2 FROM relation WHERE partner_1 = '$me' AND relation_type = 'friend' AND relation_status = 'connected'";
 
     global $conn;
     $query_status = mysqli_query($conn, $query_friends);

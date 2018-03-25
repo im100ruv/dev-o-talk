@@ -16,25 +16,35 @@
 	<script src="../node_modules/uikit/dist/js/uikit-icons.min.js"></script>
 </head>
 <body>
-	<nav class="uk-container uk-navbar-container uk-margin" uk-navbar>
-	    <div class="uk-navbar-left">
-	        <a class="uk-navbar-item uk-logo" href="#">{dev-o-talk}</a>
-		</div>
-	    <div class="uk-navbar-item uk-navbar-right">
-	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png" width="100px">
-	        <form method="POST" action="index.php">
-	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
-	        </form>
-	    </div>
-	</nav>
-	<section class="uk-position-relative">
-		<div class="uk-section" style="background-color: #2F9A44; background-size: 100%; height: 250px;">
+	<section uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar">
+		<nav class="uk-container uk-navbar-container uk-margin" style="background-color: #004D40" uk-navbar>
+		    <div class="uk-navbar-left">
+		        <a class="uk-navbar-item uk-logo" style="color: #FFFFFF" href="#">{dev-o-talk}</a>
+			</div>
+		    <div class="uk-navbar-item uk-navbar-right">
+		    	<?php 
+		    		$img = getUserImage();
+		    		echo
+		        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+		        ?>
+		        <form method="POST" action="index.php">
+		        	<input class="uk-button-small uk-button-danger" style="background-color: #AE2204;" type="submit" name="btnLogOut" value="Sign out" />
+		        </form>
+		    </div>
+		</nav>
+	</section>
+	<section class="uk-position-relative uk-container">
+		<div class="uk-section" style="background-color: #00695C; background-size: 100%; height: 250px;">
 			<div class="uk-grid uk-grid-divider" data-uk-grid-margin>
 				<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
 					<div class="uk-grid">
 						<div class="uk-width-1-2"></div>
 						<div class="uk-width-1-2">
-							<img class="uk-navbar-item uk-align-right" src="../assets/img/kb.png">
+							<?php 
+					    		$targetImg = getTargetImage();
+					    		echo
+								'<img class="uk-navbar-item uk-align-right uk-border-circle" src="../assets/usrImg/'.$targetImg.'.png">';
+							?>
 						</div>
 					</div>					
 				</div>
@@ -42,7 +52,7 @@
 					<div class="uk-grid">
 						<div class="uk-width-1-2">
 							<h2 class="uk-heading-large" style="color: #FFFFFF"><?php getUserName() ?></h2>
-							<h5>iOS developer</h5>
+							<h5 style="color: #FFFFFF"><?php getNickName() ?></h5>
 						</div>
 						<div class="uk-width-1-2"></div>
 					</div>
@@ -76,8 +86,8 @@
 							    	'<div class="uk-text-right">
 							    		<input type="text" name="hiddenByValue" value="' . $row["notif_by"] . '" hidden />
 							    		<input type="text" name="hiddenByTypeValue" value="' . $row["notif_by_type"] . '" hidden />
-							    		<input type="submit" class="uk-button-primary uk-button-small" name="btnConfirmConnect" value="Connect" />
-							    		<input type="submit" class="uk-button-secondary uk-button-small" name="btnViewProfile" value="View Profile" />
+							    		<input type="submit" class="uk-button-primary uk-button-small" style="background-color: #004D40" name="btnConfirmConnect" value="Connect" />
+							    		<input type="submit" class="uk-button-secondary uk-button-small" style="background-color: #009688" name="btnViewProfile" value="View Profile" />
 							    	</div>
 						    	</form>
 						    </li>
@@ -105,7 +115,7 @@
 			            <textarea class="uk-textarea" rows="5" name="teamDesc" placeholder="description"></textarea>
 			        </div>
 			        <div class="uk-margin">
-			            <input type="submit" class="uk-button-primary uk-button-large" name="btnTeamCreate" value="Create">
+			            <input type="submit" class="uk-button-primary uk-button-large" style="background-color: #004D40" name="btnTeamCreate" value="Create">
 			        </div>
 			    </fieldset>
 			</form>
@@ -128,7 +138,7 @@
 						    <li> 
 						    	<form method="POST" action="team.php">
 							    	<div class="uk-text-center">
-							    		<input type="submit" class="uk-button-primary uk-button-large" name="btnMyTeam" value="' . $row["partner_1"] . '" />
+							    		<input type="submit" class="uk-button-primary uk-button-large" style="background-color: #009688" name="btnMyTeam" value="' . $row["partner_1"] . '" />
 							    	</div>
 						    	</form>
 						    </li>
@@ -139,7 +149,7 @@
 	    		}
 	        ?>
 	        <div class="uk-text-right">
-	        	<button class="uk-button uk-button-secondary" uk-toggle="target: #createTeamModal">Create A Team</button>
+	        	<button class="uk-button uk-button-secondary" style="background-color: #004D40" uk-toggle="target: #createTeamModal">Create A Team</button>
 	        </div>
 	    </div>
 	</div>
@@ -160,7 +170,7 @@
 						    <li> 
 						    	<form method="POST" action="timeline.php">
 							    	<div class="uk-text-center">
-							    		<input type="submit" class="uk-button-primary uk-button-large" name="btnMyFriend" value="' . $friendRow["partner_1"] . '" />
+							    		<input type="submit" class="uk-button-primary uk-button-large" style="background-color: #009688" name="btnMyFriend" value="' . $friendRow["friends"] . '" />
 							    	</div>
 						    	</form>
 						    </li>
@@ -174,17 +184,17 @@
 	</div>
 
 	<section class="uk-section uk-position-relative">
-		<div class="uk-container uk-container-small uk-card uk-card-default">
+		<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #E0F2F1">
 			<br>
 			<div class="uk-child-width-1-3 uk-grid-small uk-text-center" uk-grid>
 			    <div>
-			        <a href="./profile.php"><div class="uk-card uk-card-secondary uk-card-body">Profile</div></a>
+			        <a href="./profile.php"><div class="uk-card uk-card-secondary uk-card-body uk-animation-scale-up" style="background-color: #009688">Profile</div></a>
 			    </div>
 			    <div>
-			        <a href="./storyboard.php"><div class="uk-card uk-card-secondary uk-card-body">Storyboard</div></a>
+			        <a href="./storyboard.php"><div class="uk-card uk-card-secondary uk-card-body uk-animation-scale-up" style="background-color: #009688">Storyboard</div></a>
 			    </div>
 			    <div>
-			        <div class="uk-card uk-card-secondary uk-card-body" uk-toggle="target: #notifModal">Notifications 
+			        <div class="uk-card uk-card-secondary uk-card-body uk-animation-scale-up" uk-toggle="target: #notifModal" style="background-color: #009688">Notifications 
 			        	<?php 
 			        		if($numRows > 0) {
 			        			echo '(' . $numRows . ')';
@@ -193,13 +203,13 @@
 			        </div>
 			    </div>
 			    <div>
-			        <a href="./timeline.php"><div class="uk-card uk-card-secondary uk-card-body">Stamps</div></a>
+			        <a href="./timeline.php"><div class="uk-card uk-card-secondary uk-card-body uk-animation-scale-up" style="background-color: #009688">Stamps</div></a>
 			    </div>
 			    <div>
-			        <div class="uk-card uk-card-secondary uk-card-body" uk-toggle="target: #teamModal">Team</div>
+			        <div class="uk-card uk-card-secondary uk-card-body uk-animation-scale-up" uk-toggle="target: #teamModal" style="background-color: #009688">Team</div>
 			    </div>
 			    <div>
-			        <div class="uk-card uk-card-secondary uk-card-body" uk-toggle="target: #friendModal">Friends</div>
+			        <div class="uk-card uk-card-secondary uk-card-body uk-animation-scale-up" uk-toggle="target: #friendModal" style="background-color: #009688">Friends</div>
 			    </div>
 			</div>
 			<br>

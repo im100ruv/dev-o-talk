@@ -11,31 +11,41 @@
 	<script src="../node_modules/uikit/dist/js/uikit-icons.min.js"></script>
 </head>
 <body>
-	<nav class="uk-container uk-navbar-container uk-margin" uk-navbar>
-	    <div class="uk-navbar-left">
-	        <a class="uk-navbar-item uk-logo" href="dashboard.php">{dev-o-talk}</a>
-		</div>
-	    <div class="uk-navbar-item uk-navbar-right">
-	    	<form method="POST" action="timeline.php">
-	    		<input class="uk-text-small" type="text" name="targetUser" placeholder="type userid" />
-	    		<input class="uk-button-small uk-button-primary" type="submit" name="btnUserSearch" value="Search" />
-	    		<input class="uk-button-small uk-button-secondary" type="submit" name="btnSelfSearch" value="See my own" />
-	    	</form>
-	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
-	        <form method="POST" action="index.php">
-	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
-	        </form>
-	    </div>
-	</nav>
+	<section uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar">
+		<nav class="uk-container uk-navbar-container uk-margin" style="background-color: #004D40" uk-navbar>
+		    <div class="uk-navbar-left">
+		        <a class="uk-navbar-item uk-logo" style="color: #FFFFFF" href="dashboard.php">{dev-o-talk}</a>
+			</div>
+		    <div class="uk-navbar-item uk-navbar-right">
+		    	<form method="POST" action="timeline.php">
+		    		<input class="uk-text-small" type="text" name="targetUser" placeholder="type userid" />
+		    		<input class="uk-button-small uk-button-primary" style="background-color: #009688" type="submit" name="btnUserSearch" value="Search" />
+		    		<input class="uk-button-small uk-button-secondary" style="background-color: #00796B" type="submit" name="btnSelfSearch" value="See my own" />
+		    	</form>
+		        <?php 
+		    		$img = getUserImage();
+		    		echo
+		        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+		        ?>
+		        <form method="POST" action="index.php">
+		        	<input class="uk-button-small uk-button-danger" style="background-color: #AE2204;" type="submit" name="btnLogOut" value="Sign out" />
+		        </form>
+		    </div>
+		</nav>
+	</section>
 
-	<section class="uk-position-relative">
-		<div class="uk-section" style="background-color: #2F9A44; background-size: 100%; height: 250px;">
+	<section class="uk-position-relative uk-container">
+		<div class="uk-section" style="background-color: #00695C; background-size: 100%; height: 250px;">
 			<div class="uk-grid uk-grid-divider" data-uk-grid-margin>
 				<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
 					<div class="uk-grid">
 						<div class="uk-width-1-2"></div>
 						<div class="uk-width-1-2">
-							<img class="uk-navbar-item uk-align-right" src="../assets/img/kb.png">
+							<?php 
+					    		$targetImg = getTargetImage();
+					    		echo
+								'<img class="uk-navbar-item uk-align-right uk-border-circle" src="../assets/usrImg/'.$targetImg.'.png">';
+							?>
 						</div>
 					</div>					
 				</div>
@@ -43,10 +53,10 @@
 					<div class="uk-grid">
 						<div class="uk-width-1-2">
 							<h2 class="uk-heading-large" style="color: #FFFFFF"><?php getUserName() ?></h2>
-							<h5>iOS developer</h5>
+							<h5 style="color: #FFFFFF"><?php getNickName() ?></h5>
 						</div>
 						<div class="uk-width-1-2">
-							<a href="profile.php"><button class="uk-button-primary uk-button-large"> View Profile </button></a>
+							<a href="profile.php"><button class="uk-button-primary uk-button-large" style="background-color: #009688"> View Profile </button></a>
 						</div>
 					</div>
 				</div>
@@ -54,23 +64,31 @@
 		</div>
 	</section>
 
-	<section class="uk-section uk-position-relative">
-		<div class="uk-container uk-container-small uk-card uk-card-default">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<form class="uk-form" method="POST" action="timeline.php">
-			    		<input type="text" name="fromPageHidden" value="profile" hidden />
-			    		<div class="uk-margin">
-				            <textarea id="stampText" class="uk-textarea" rows="8" placeholder="Write your stamp here.." name="stampText"><?php getTextArea(); ?></textarea>
-				        </div>
-			    		<input type="submit" name="btnEditor" class="uk-button uk-button-secondary uk-align-left" value="Open Editor" />
-			    		<input type="submit" name="btnPost" class="uk-button uk-button-primary uk-align-right" value="Post" />
-			    	</form>
-			    </div>
-			</div>
-		</div>
-	</section>
+	<?php 
+		if(!isset($_SESSION['target_user_id'])) {
+			echo 
+			'<section class="uk-section uk-position-relative">
+				<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #E0F2F1">
+					<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
+					    <div class="uk-width-1-1 uk-first-column">';
+				    		$img = getUserImage();
+				    		echo
+				        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+				        	echo
+					    	'<form class="uk-form" method="POST" action="timeline.php">
+					    		<input type="text" name="fromPageHidden" value="timeline" hidden />
+					    		<div class="uk-margin">
+						            <textarea id="stampText" class="uk-textarea" rows="8" placeholder="Write your stamp here.." name="stampText">'; getTextArea(); echo'</textarea>
+						        </div>
+					    		<input type="submit" name="btnEditor" class="uk-button uk-button-secondary uk-align-left" style="background-color: #009688" value="Open Editor" />
+					    		<input type="submit" name="btnPost" class="uk-button uk-button-primary uk-align-right" style="background-color: #004D40" value="Post" />
+					    	</form>
+					    </div>
+					</div>
+				</div>
+			</section>';
+		}
+	?>
 	
 	<?php 
 		$result_stamps = getUserPosts();
@@ -79,11 +97,14 @@
           		$result_comments = getStampComments($row['sn']);
 				echo
 				'<section class="uk-section uk-position-relative">
-					<div class="uk-container uk-container-small uk-card uk-card-default">
+					<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #E0F2F1">
 						<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-						    <div class="uk-width-1-1 uk-first-column">
-						    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-						    	<div class="uk-column-1-1">
+						    <div class="uk-width-1-1 uk-first-column">';
+						    	$img = getProfileImage($row['user_id']);
+					    		echo
+					        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-align-left uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+						    	echo
+						    	'<div class="uk-column-1-1">
 						    		<label class="uk-text-large">' . $row['user_id'] . '</label>
 						    		<label class="uk-text-small">&nbsp; posted</label>
 						    	</div>
@@ -102,11 +123,14 @@
 					if(mysqli_num_rows($result_comments) > 0) {
 			          	while($row_comments = mysqli_fetch_assoc($result_comments)) { 
 							echo
-							'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
+							'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: #E0E0E0">
 								<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-								    <div class="uk-width-1-1 uk-first-column">
-								    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-								    	<div class="uk-column-1-1">
+								    <div class="uk-width-1-1 uk-first-column">';
+								    	$img = getProfileImage($row_comments['user_id']);
+							    		echo
+							        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-align-left uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+								    	echo
+								    	'<div class="uk-column-1-1">
 								    		<label class="uk-text-large">' . $row_comments['user_id'] . '</label>
 								    		<label class="uk-text-small">&nbsp; ' . $row_comments['date_commented'] . '</label>
 								    	</div>
@@ -122,7 +146,7 @@
 				echo 
 					'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
 					    <div class="uk-width-5-6"></div>
-					    <label class="uk-width-1-6 uk-align-center" style="color: green" name="demo" onclick="document.getElementById(' . $row['sn'] . ').click();"> 
+					    <label class="uk-width-1-6 uk-align-center" style="color: #00796B" name="demo" onclick="document.getElementById(' . $row['sn'] . ').click();"> 
 					    	Add a comment 
 					    </label>
 					    <form method="POST" action="stamp.php">
@@ -133,6 +157,24 @@
 					</div>
 				</section>';
 		  	}
+		} else {
+			echo
+			'<section class="uk-section uk-position-relative">
+				<div class="uk-container uk-container-small uk-card uk-card-default">
+					<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
+					    <div class="uk-width-1-1 uk-first-column">
+					    	<p></p>
+					    	<p>
+					    		No posts yet.
+					    	</p>
+					    	<p></p>
+					    	<p></p>
+					    	<p></p>
+					    	<p></p>
+					    </div>
+					</div>
+				</div>
+			</section>';
 		}
 	?>
 

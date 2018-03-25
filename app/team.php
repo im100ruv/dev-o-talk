@@ -18,17 +18,23 @@
 	    	$teamRow = mysqli_fetch_assoc($teamDetails);
 	    }
 	?>
-	<nav class="uk-container uk-navbar-container uk-margin" uk-navbar>
-	    <div class="uk-navbar-left">
-	        <a class="uk-navbar-item uk-logo" href="dashboard.php">{dev-o-talk}</a>
-		</div>
-	    <div class="uk-navbar-item uk-navbar-right">
-	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
-	        <form method="POST" action="index.php">
-	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
-	        </form>
-	    </div>
-	</nav>
+	<section uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar">
+		<nav class="uk-container uk-navbar-container uk-margin" style="background-color: #004D40" uk-navbar>
+		    <div class="uk-navbar-left">
+		        <a class="uk-navbar-item uk-logo" style="color: #FFFFFF" href="dashboard.php">{dev-o-talk}</a>
+			</div>
+		    <div class="uk-navbar-item uk-navbar-right">
+		        <?php 
+		    		$img = getUserImage();
+		    		echo
+		        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+		        ?>
+		        <form method="POST" action="index.php">
+		        	<input class="uk-button-small uk-button-danger" style="background-color: #AE2204;" type="submit" name="btnLogOut" value="Sign out" />
+		        </form>
+		    </div>
+		</nav>
+	</section>
 
 	<div id="memberModal" class="uk-modal uk-flex-top" uk-modal>
 	    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical" uk-overflow-auto>
@@ -58,7 +64,7 @@
 	    			'<div class="uk-text-right">
 			        	<form method="POST" action="team.php">
 				    		<input class="uk-text-small" type="text" name="newMember" placeholder="Type userid to invite" />
-				    		<input class="uk-button-small uk-button-primary" type="submit" name="btnInviteToTeam" value="Invite" />
+				    		<input class="uk-button-small uk-button-primary" style="background-color: #009688" type="submit" name="btnInviteToTeam" value="Invite" />
 				    	</form>
 			        </div>';
 	    		}
@@ -66,15 +72,19 @@
 	    </div>
 	</div>
 
-	<section class="uk-position-relative">
-		<div class="uk-section" style="background-color: gray; background-size: 100%; height: 250px;">
+	<section class="uk-position-relative uk-container">
+		<div class="uk-section" style="background-color: #424242; background-size: 100%; height: 250px;">
 			<div class="uk-grid uk-grid-divider" data-uk-grid-margin>
 				<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
 					<div class="uk-grid">
 						<div class="uk-width-1-2"></div>
 						<div class="uk-width-1-2">
-							<img class="uk-navbar-item uk-align-right" src="../assets/img/kb.png">
-							<h4><?php echo 'admin: ' . $teamRow['team_admin_id']; ?></h4>
+							<?php 
+					    		$targetImg = getTargetImage();
+					    		echo
+								'<img class="uk-navbar-item uk-align-right" src="../assets/usrImg/'.$targetImg.'.png">';
+							?>
+							<h4 style="color: #FFFFFF"><?php echo 'Admin : ' . $teamRow['team_admin_id']; ?></h4>
 						</div>
 					</div>					
 				</div>
@@ -82,10 +92,10 @@
 					<div class="uk-grid">
 						<div class="uk-width-1-2">
 							<h2 class="uk-heading-large" style="color: #FFFFFF"><?php getTeamName() ?></h2>
-							<h5><?php echo $teamRow['team_desc']; ?></h5>
+							<h5 style="color: #FFFFFF"><?php echo $teamRow['team_desc']; ?></h5>
 						</div>
 						<div class="uk-width-1-2">
-	    					<button class="uk-button uk-button-secondary" uk-toggle="target: #memberModal">Team Members</button>
+	    					<button class="uk-button uk-button-secondary" style="background-color: #009688" uk-toggle="target: #memberModal">Team Members</button>
 						</div>
 					</div>
 				</div>
@@ -97,17 +107,20 @@
 		if(isUserInTeam()) {
 			echo
 			'<section class="uk-section uk-position-relative">
-				<div class="uk-container uk-container-small uk-card uk-card-default">
+				<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #EEEEEE">
 					<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-					    <div class="uk-width-1-1 uk-first-column">
-					    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-					    	<form class="uk-form" method="POST" action="team.php">
+					    <div class="uk-width-1-1 uk-first-column">';
+					    	$img = getUserImage();
+				    		echo
+				        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+				        	echo
+					    	'<form class="uk-form" method="POST" action="team.php">
 					    		<input type="text" name="fromPageHidden" value="team" hidden />
 					    		<div class="uk-margin">
 						            <textarea id="stampText" class="uk-textarea" rows="8" placeholder="Write your stamp here.." name="stampText">'; getTextArea(); echo '</textarea>
 						        </div>
-					    		<input type="submit" name="btnEditor" class="uk-button uk-button-secondary uk-align-left" value="Open Editor" />
-					    		<input type="submit" name="btnPost" class="uk-button uk-button-primary uk-align-right" value="Post" />
+					    		<input type="submit" name="btnEditor" class="uk-button uk-button-secondary uk-align-left" style="background-color: #009688" value="Open Editor" />
+					    		<input type="submit" name="btnPost" class="uk-button uk-button-primary uk-align-right" style="background-color: #004D40" value="Post" />
 					    	</form>
 					    </div>
 					</div>
@@ -120,11 +133,14 @@
 	          		$result_comments = getStampComments($row['sn']);
 					echo
 					'<section class="uk-section uk-position-relative">
-						<div class="uk-container uk-container-small uk-card uk-card-default">
+						<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #EEEEEE">
 							<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-							    <div class="uk-width-1-1 uk-first-column">
-							    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-							    	<div class="uk-column-1-1">
+							    <div class="uk-width-1-1 uk-first-column">';
+							    	$img = getProfileImage($row['user_id']);
+						    		echo
+						        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-align-left uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+							    	echo
+							    	'<div class="uk-column-1-1">
 							    		<label class="uk-text-large">' . $row['user_id'] . '</label>
 							    		<label class="uk-text-small">&nbsp; posted</label>
 							    	</div>
@@ -143,11 +159,14 @@
 						if(mysqli_num_rows($result_comments) > 0) {
 				          	while($row_comments =mysqli_fetch_assoc($result_comments)) { 
 								echo
-								'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
+								'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: #E0E0E0">
 									<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-									    <div class="uk-width-1-1 uk-first-column">
-									    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-									    	<div class="uk-column-1-1">
+									    <div class="uk-width-1-1 uk-first-column">';
+									    	$img = getProfileImage($row_comments['user_id']);
+								    		echo
+								        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-align-left uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+									    	echo
+									    	'<div class="uk-column-1-1">
 									    		<label class="uk-text-large">' . $row_comments['user_id'] . '</label>
 									    		<label class="uk-text-small">&nbsp; ' . $row_comments['date_commented'] . '</label>
 									    	</div>
@@ -163,7 +182,7 @@
 					echo 
 						'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
 						    <div class="uk-width-5-6"></div>
-						    <label class="uk-width-1-6 uk-align-center" style="color: green" name="demo" onclick="document.getElementById(' . $row['sn'] . ').click();"> 
+						    <label class="uk-width-1-6 uk-align-center" style="color: #00796B" name="demo" onclick="document.getElementById(' . $row['sn'] . ').click();"> 
 						    	Add a comment 
 						    </label>
 						    <form method="POST" action="stamp.php">

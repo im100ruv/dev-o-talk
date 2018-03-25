@@ -29,7 +29,7 @@
 </pre> 
 
   <form method="POST" action="editor.php">
-    <input type="submit" id="btnEditorSave" name="btnEditorSave" style="position: absolute; top: 382px; left: 50px;" value="Save" onclick="sendCode();">
+    <input type="submit" id="btnEditorSave" name="btnEditorSave" style="position: absolute; top: 382px; left: 50px; color: red" value="Save" onclick="sendCode();">
   </form>
 
   <select id="codeMode" style="position: absolute; top: 382px; left: 200px;" onchange="changeMode();">
@@ -46,7 +46,7 @@
     <option value="html_ruby">html_ruby</option>
     <option value="html">html</option>
     <option value="java">java</option>
-    <option value="javascript">javascript</option>
+    <option value="javascript" selected>javascript</option>
     <option value="json">json</option>
     <option value="jsp">jsp</option>
     <option value="kotlin">kotlin</option>
@@ -87,7 +87,7 @@
     <option value="monokai">monokai</option>
     <option value="terminal">terminal</option>
     <option value="tomorrow">tomorrow</option>
-    <option value="twilight">twilight</option>
+    <option value="twilight" selected>twilight</option>
     <option value="xcode">xcode</option>
   </select>
 

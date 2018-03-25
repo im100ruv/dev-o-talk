@@ -11,31 +11,41 @@
 	<script src="../node_modules/uikit/dist/js/uikit-icons.min.js"></script>
 </head>
 <body>
-	<nav class="uk-container uk-navbar-container uk-margin" uk-navbar>
-	    <div class="uk-navbar-left">
-	        <a class="uk-navbar-item uk-logo" href="dashboard.php">{dev-o-talk}</a>
-		</div>
-	    <div class="uk-navbar-item uk-navbar-right">
-	    	<form method="POST" action="profile.php">
-	    		<input class="uk-text-small" type="text" name="targetUser" placeholder="type userid" />
-	    		<input class="uk-button-small uk-button-primary" type="submit" name="btnUserSearch" value="Search" />
-	    		<input class="uk-button-small uk-button-secondary" type="submit" name="btnSelfSearch" value="See my own" />
-	    	</form>
-	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
-	        <form method="POST" action="index.php">
-	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
-	        </form>
-	    </div>
-	</nav>
+	<section uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar">
+		<nav class="uk-container uk-navbar-container uk-margin" style="background-color: #004D40" uk-navbar>
+		    <div class="uk-navbar-left">
+		        <a class="uk-navbar-item uk-logo" style="color: #FFFFFF" href="dashboard.php">{dev-o-talk}</a>
+			</div>
+		    <div class="uk-navbar-item uk-navbar-right">
+		    	<form method="POST" action="profile.php">
+		    		<input class="uk-text-small" type="text" name="targetUser" placeholder="type userid" />
+		    		<input class="uk-button-small uk-button-primary" style="background-color: #009688" type="submit" name="btnUserSearch" value="Search" />
+		    		<input class="uk-button-small uk-button-secondary" style="background-color: #00796B" type="submit" name="btnSelfSearch" value="See my own" />
+		    	</form>
+		        <?php 
+		    		$img = getUserImage();
+		    		echo
+		        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+		        ?>
+		        <form method="POST" action="index.php">
+		        	<input class="uk-button-small uk-button-danger" style="background-color: #AE2204;" type="submit" name="btnLogOut" value="Sign out" />
+		        </form>
+		    </div>
+		</nav>
+	</section>
 
-	<section class="uk-position-relative">
-		<div class="uk-section" style="background-color: #2F9A44; background-size: 100%; height: 250px;">
+	<section class="uk-position-relative uk-container">
+		<div class="uk-section" style="background-color: #00695C; background-size: 100%; height: 250px;">
 			<div class="uk-grid uk-grid-divider" data-uk-grid-margin>
 				<div class="uk-vertical-align-middle uk-text-center uk-width-1-2">
 					<div class="uk-grid">
 						<div class="uk-width-1-2"></div>
 						<div class="uk-width-1-2">
-							<img class="uk-navbar-item uk-align-right" src="../assets/img/kb.png">
+							<?php 
+					    		$targetImg = getTargetImage();
+					    		echo
+								'<img class="uk-navbar-item uk-align-right uk-border-circle" src="../assets/usrImg/'.$targetImg.'.png">';
+							?>
 						</div>
 					</div>					
 				</div>
@@ -43,7 +53,7 @@
 					<div class="uk-grid">
 						<div class="uk-width-1-2">
 							<h2 class="uk-heading-large" style="color: #FFFFFF"><?php getUserName() ?></h2>
-							<h5>iOS developer</h5>
+							<h5 style="color: #FFFFFF"><?php getNickName() ?></h5>
 						</div>
 						<div class="uk-width-1-2">
 							<?php 
@@ -56,19 +66,19 @@
 	    								$row =mysqli_fetch_assoc($result);
 	    								if($row['notif_status'] == 'pending') {
 	    									echo 
-	    									'<button class="uk-button-primary uk-button-large"> Connection Requested </button>';
+	    									'<button class="uk-button-primary uk-button-large" style="background-color: #009688"> Connection Requested </button>';
 	    								} elseif($row['notif_status'] == 'accepted') {
 	    									echo 
-	    									'<button class="uk-button-primary uk-button-large"> Connected </button>';
+	    									'<button class="uk-button-primary uk-button-large" style="background-color: #009688"> Connected </button>';
 	    									echo 
-	    									'<input type="submit" class="uk-button-danger uk-button-small" name="btnDisconnectUser" value="Disconnect" />';
+	    									'<input type="submit" class="uk-button-danger uk-button-small" style="background-color: #AE2204;" name="btnDisconnectUser" value="Disconnect" />';
 	    								} elseif($row['notif_status'] == 'deleted') {
 	    									echo 
-	    									'<input type="submit" class="uk-button-primary uk-button-large" name="btnConnectUser" value="Connect Now" />';
+	    									'<input type="submit" class="uk-button-primary uk-button-large" style="background-color: #009688" name="btnConnectUser" value="Connect Now" />';
 	    								}
 	    							} else {
 	    								echo 
-	    								'<input type="submit" class="uk-button-primary uk-button-large" name="btnConnectUser" value="Connect Now" />';
+	    								'<input type="submit" class="uk-button-primary uk-button-large" style="background-color: #009688" name="btnConnectUser" value="Connect Now" />';
 	    							}
 									echo 
 									'</form>';
@@ -90,8 +100,11 @@
 			        <button class="uk-modal-close-default" type="button" uk-close></button>
 
 			        <!-- Modal content-->
-			        <form method="POST" action="profile.php">
+			        <form method="POST" action="profile.php" enctype="multipart/form-data">
 					    <fieldset class="uk-fieldset">
+					    	<div class="uk-margin">
+					            <input class="uk-input" type="file" name="imgInput">
+					        </div>
 					        <div class="uk-margin">
 					            <input class="uk-input" type="text" name="firstName" placeholder="first name">
 					        </div>
@@ -102,7 +115,7 @@
 					            <input class="uk-input" type="text" name="nickName" placeholder="nickname">
 					        </div>
 					        <div class="uk-margin">
-					            <input class="uk-input" type="text" name="mobile" placeholder="mobile">
+					            <input class="uk-input" type="text" id="mobile" name="mobile" placeholder="mobile" onchange="isValidMobile();">
 					        </div>
 					        <div class="uk-margin">
 					            <textarea class="uk-textarea" rows="5" name="location" placeholder="location"></textarea>
@@ -114,14 +127,42 @@
 					            <textarea class="uk-textarea" rows="5" name="achievement" placeholder="achievement"></textarea>
 					        </div>
 					        <div class="uk-margin">
-					            <input type="submit" class="uk-button-primary uk-button-large" name="btnProfileForm" value="Submit">
+					            <input type="submit" class="uk-button-primary uk-button-large" style="background-color: #004D40" name="btnProfileForm" value="Submit">
 					        </div>
 					    </fieldset>
 					</form>
 			    </div>
 			</div>
 
-			<div class="uk-text-right"> <button class="uk-button-primary uk-button-small" uk-toggle="target: #profileModal">Edit Profile</button> </div>';
+			<div id="changePasswordModal" class="uk-modal uk-flex-top" uk-modal>
+			    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical" uk-overflow-auto>
+			    	<p class="uk-modal-title">Change your password</p>
+			        <button class="uk-modal-close-default" type="button" uk-close></button>
+
+			        <!-- Modal content-->
+			        <form method="POST" action="profile.php">
+					    <div class="uk-margin">
+							<input class="uk-input" type="password" placeholder="Old Password" name="oldPassword">
+						</div>
+						<div class="uk-margin">
+							<input class="uk-input" type="password" placeholder="New Password" name="newPassword">
+						</div>
+						<div class="uk-margin">
+							<input class="uk-input" type="password" placeholder="Confirm Password" name="cnfPassword">
+						</div>
+						<div class="uk-margin">
+							<input type="submit" class="uk-button-primary uk-button-large" style="background-color: #004D40" name="btnChangePass" value="Set Password">
+						</div>
+					</form>
+			    </div>
+			</div>
+
+			<div class="uk-container">
+				<div class="uk-text-right"> 
+					<button class="uk-button-primary uk-button-small" style="background-color: #009688" uk-toggle="target: #profileModal">Edit Profile</button> 
+					<button class="uk-button-primary uk-button-small" style="background-color: #009688" uk-toggle="target: #changePasswordModal">Change Password</button>
+				</div>
+			</div>';
 		}
 	?>
 	
@@ -131,7 +172,7 @@
           	while($userRow =mysqli_fetch_assoc($result_profile)) { 
 				echo
 				'<section class="uk-section uk-position-relative">
-					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body" style="background-color: #E0F2F1">
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Username </h3> </div>
 							<div class="uk-width-3-4"> <h3> ' . $userRow['user_id'] . ' </h3> </div>
@@ -149,7 +190,7 @@
 							<div class="uk-width-3-4"> <h3> ' . $userRow['nick_name'] . ' </h3> </div>
 						</div>
 					</div>
-					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body" style="background-color: #E0F2F1">
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Email </h3> </div>
 							<div class="uk-width-3-4"> <h3> ' . $userRow['email'] . ' </h3> </div>
@@ -163,7 +204,7 @@
 							<div class="uk-width-3-4"> <h3> ' . $userRow['location'] . ' </h3> </div>
 						</div>
 					</div>
-					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+					<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body" style="background-color: #E0F2F1">
 						<div class="uk-grid" uk-grid>
 							<div class="uk-width-1-4"> <h3> Qualification </h3> </div>
 							<div class="uk-width-3-4"> <h3> ' . $userRow['qualification'] . ' </h3> </div>
@@ -175,7 +216,7 @@
 					</div>';
 					if(!isset($_SESSION['target_user_id'])) {
 						echo 
-						'<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body">
+						'<div class="uk-container uk-container-medium uk-card uk-card-default uk-card-body" style="background-color: #E0F2F1">
 							<div class="uk-grid" uk-grid>
 								<div class="uk-width-1-4"> <h3> Last Login </h3> </div>
 								<div class="uk-width-3-4"> <h3> ' . $userRow['last_login'] . ' </h3> </div>
@@ -204,5 +245,18 @@
 		</div>
 		<a href="#impx-body" class="impx-to-top" data-uk-smooth-scroll="{offset: 0}"><i class="uk-icon-long-arrow-up"></i></a>
 	</footer>
+
+	<script>
+		function isValidMobile() {
+			var mob = document.getElementById('mobile').value;
+			if (isNaN(mob)) {
+				alert('enter only digits');
+				document.getElementById('mobile').value = "";
+			} else if(mob.length != 10){
+				alert('enter valid mobile number of 10 digits');
+				document.getElementById('mobile').value = "";
+			}
+		}
+	</script>
 </body>
 </html>

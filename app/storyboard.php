@@ -11,30 +11,40 @@
 	<script src="../node_modules/uikit/dist/js/uikit-icons.min.js"></script>
 </head>
 <body>
-	<nav class="uk-container uk-navbar-container uk-margin" uk-navbar>
-	    <div class="uk-navbar-left">
-	        <a class="uk-navbar-item uk-logo" href="dashboard.php">{dev-o-talk}</a>
-		</div>
-	    <div class="uk-navbar-item uk-navbar-right">
-	        <img class="uk-navbar-item uk-navbar-nav uk-navbar-icon" src="../assets/img/kb.png">
-	        <form method="POST" action="index.php">
-	        	<input class="uk-button-small uk-button-danger" type="submit" name="btnLogOut" value="Log out" />
-	        </form>
-	    </div>
-	</nav>
+	<section uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar">
+		<nav class="uk-container uk-navbar-container uk-margin" style="background-color: #004D40" uk-navbar>
+		    <div class="uk-navbar-left">
+		        <a class="uk-navbar-item uk-logo" style="color: #FFFFFF" href="dashboard.php">{dev-o-talk}</a>
+			</div>
+		    <div class="uk-navbar-item uk-navbar-right">
+		        <?php 
+		    		$img = getUserImage();
+		    		echo
+		        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+		        ?>
+		        <form method="POST" action="index.php">
+		        	<input class="uk-button-small uk-button-danger" style="background-color: #AE2204;" type="submit" name="btnLogOut" value="Sign out" />
+		        </form>
+		    </div>
+		</nav>
+	</section>
 
 	<section class="uk-section uk-position-relative">
-		<div class="uk-container uk-container-small uk-card uk-card-default">
+		<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #E0F2F1">
 			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
 			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
+			    	<?php 
+			    		$img = getUserImage();
+			    		echo
+			        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+			        ?>
 			    	<form class="uk-form" method="POST" action="storyboard.php">
 			    		<input type="text" name="fromPageHidden" value="storyboard" hidden />
 			    		<div class="uk-margin">
 				            <textarea id="stampText" class="uk-textarea" rows="8" placeholder="Write your stamp here.." name="stampText"><?php getTextArea(); ?></textarea>
 				        </div>
-			    		<input type="submit" name="btnEditor" class="uk-button uk-button-secondary uk-align-left" value="Open Editor" />
-			    		<input type="submit" name="btnPost" class="uk-button uk-button-primary uk-align-right" value="Post" />
+			    		<input type="submit" name="btnEditor" class="uk-button uk-button-secondary uk-align-left" style="background-color: #009688" value="Open Editor" />
+			    		<input type="submit" name="btnPost" class="uk-button uk-button-primary uk-align-right" style="background-color: #004D40" value="Post" />
 			    	</form>
 			    </div>
 			</div>
@@ -48,11 +58,14 @@
           		$result_comments = getStampComments($row['sn']);
 				echo
 				'<section class="uk-section uk-position-relative">
-					<div class="uk-container uk-container-small uk-card uk-card-default">
+					<div class="uk-container uk-container-small uk-card uk-card-default" style="background-color: #E0F2F1">
 						<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-						    <div class="uk-width-1-1 uk-first-column">
-						    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-						    	<div class="uk-column-1-1">
+						    <div class="uk-width-1-1 uk-first-column">';
+						    	$img = getProfileImage($row['user_id']);
+					    		echo
+					        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-align-left uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+						    	echo
+						    	'<div class="uk-column-1-1">
 						    		<label class="uk-text-large">' . $row['user_id'] . '</label>
 						    		<label class="uk-text-small">&nbsp; posted</label>
 						    	</div>
@@ -71,11 +84,14 @@
 					if(mysqli_num_rows($result_comments) > 0) {
 			          	while($row_comments =mysqli_fetch_assoc($result_comments)) { 
 							echo
-							'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
+							'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: #E0E0E0">
 								<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-								    <div class="uk-width-1-1 uk-first-column">
-								    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-								    	<div class="uk-column-1-1">
+								    <div class="uk-width-1-1 uk-first-column">';
+								    	$img = getProfileImage($row_comments['user_id']);
+							    		echo
+							        	'<img class="uk-navbar-item uk-navbar-nav uk-navbar-icon uk-align-left uk-border-circle" src="../assets/usrImg/'.$img.'.png" width="100px">';
+								    	echo
+								    	'<div class="uk-column-1-1">
 								    		<label class="uk-text-large">' . $row_comments['user_id'] . '</label>
 								    		<label class="uk-text-small">&nbsp; ' . $row_comments['date_commented'] . '</label>
 								    	</div>
@@ -91,7 +107,7 @@
 				echo 
 					'<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
 					    <div class="uk-width-5-6"></div>
-					    <label class="uk-width-1-6 uk-align-center" style="color: green" name="demo" onclick="document.getElementById(' . $row['sn'] . ').click();"> 
+					    <label class="uk-width-1-6 uk-align-center" style="color: #00796B" name="demo" onclick="document.getElementById(' . $row['sn'] . ').click();"> 
 					    	Add a comment 
 					    </label>
 					    <form method="POST" action="stamp.php">
@@ -104,89 +120,6 @@
 		  	}
 		}
 	?>
-
-<!-- ================= Demo containers ================================================== -->
-	<!-- <section class="uk-section uk-position-relative">
-		<div class="uk-container uk-container-small uk-card uk-card-default">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-large">Kumar Bhargav</label>
-			    		<label class="uk-text-small">&nbsp; posted</label>
-			    	</div>
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-small">2 min ago</label>	
-			    	</div>
-			    	<div class="uk-section">
-		    			<p>
-		    				<b>What is the best way of checking if an object property in Javascript is undefined?</b>
-		    				<br>I tried this:
-		    			</p>
-	    				<code><pre>
-		    				if (typeof something === "undefined") {
-		    					alert("something is undefined");
-		    				}
-		    			</pre></code>
-		    			But it is not working for me.
-			    	</div>
-			    </div>
-			</div>
-		    <div class="uk-width-5-6"></div>
-		    <label class="uk-width-1-6 uk-align-right"> 2 comments </label>
-		    <div></div>
-		</div>
-		<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-large">Bharat Prasad</label>
-			    		<label class="uk-text-small">&nbsp; 1 min ago</label>
-			    	</div>
-			    	<div class="uk-section">
-		    			<p>
-		    				You are trying to compare two objects. You should replace <code>===</code> with <code>==</code>
-		    			</p>
-	    				<code><pre>
-		    				if (typeof something == "undefined") {
-		    					alert("something is undefined");
-		    				}
-		    			</pre></code>
-		    			Also call the function for string comparision as:
-		    			<code><pre>
-		    				if "something".equals(String) {
-			    				console.log("everything is alright!")
-			    			}
-		    			</pre></code>
-			    	</div>
-			    </div>
-			</div>
-		    <div></div>
-		</div>
-
-		<div class="uk-container uk-container-small uk-card uk-card-default" style="background: lightgrey">
-			<div class="uk-grid uk-grid-margin uk-grid-stack" uk-grid>
-			    <div class="uk-width-1-1 uk-first-column">
-			    	<img class="uk-navbar-item uk-align-left" src="../assets/img/kb.png">
-			    	<div class="uk-column-1-1">
-			    		<label class="uk-text-large">Sweta Roy</label>
-			    		<label class="uk-text-small">&nbsp; 1 min ago</label>
-			    	</div>
-			    	<div class="uk-section uk-section-small">
-		    			<p>
-		    				Thank you Bharat for your tip. I was stuck with this part and your suggestions solved my problem.
-		    			</p>
-			    	</div>
-			    </div>
-			</div>
-		    <div></div>
-		    <hr>
-		    <div class="uk-width-5-6"></div>
-		    <label class="uk-width-1-6 uk-align-center" style="color: green"> Add a comment </label>
-		    <div></div>
-		</div>
-	</section> -->
 
 	<footer style="position: relative; padding: 60px 0 0 0; background-color: #202020;">
 		<div class="bottom-line">
